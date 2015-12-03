@@ -35,3 +35,12 @@ proguard/
 # IntelliJ files
 .idea
 *.iml
+*.ipr
+*.iws
+.idea/
+local.properties
+
+# Generic Android ignores
+bin/
+target
+gen/
