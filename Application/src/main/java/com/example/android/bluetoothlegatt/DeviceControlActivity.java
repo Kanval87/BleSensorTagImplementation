@@ -20,11 +20,9 @@ import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -36,7 +34,11 @@ import android.widget.ExpandableListView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 
+import com.example.android.bluetoothlegatt.BLEServices.BarometerSensor;
 import com.example.android.bluetoothlegatt.BLEServices.BleGenericSensor;
+import com.example.android.bluetoothlegatt.BLEServices.IRTSensor;
+import com.example.android.bluetoothlegatt.BLEServices.MotionSensor;
+import com.example.android.bluetoothlegatt.BLEServices.SensorTagHumidityProfile;
 import com.example.android.bluetoothlegatt.BLEServices.SimpleKeysSensor;
 import com.example.android.bluetoothlegatt.events.BleEvents;
 
@@ -95,37 +97,32 @@ public class DeviceControlActivity extends Activity {
         }
     };
 
-    // Handles various events fired by the Service.
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
-    //                        or notification operations.
-    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+
+    public void onEvent(BleEvents event) {
+        switch (event.getBleEnum()) {
+            case DataAvailable:
+                displayData(event.getData(), event.getUuid());
+                break;
+        }
+    }
+
+    public void onEventMainThread(BleEvents event) {
+        switch (event.getBleEnum()) {
+            case Connected:
                 mConnected = true;
                 updateConnectionState(R.string.connected);
                 invalidateOptionsMenu();
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                break;
+            case Disconnected:
                 mConnected = false;
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
                 clearUI();
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                // Show all the supported services and characteristics on the user interface.
-                displayGattServices(intent);
-            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                displayData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA), intent.getStringExtra(BluetoothLeService.EXTRA_UUID));
-            }
+                break;
+            case ServicesDiscovered:
+                displayGattServices();
+                break;
         }
-    };
-
-
-    public void onEvent(BleEvents event) {
-        Log.d(TAG, event.toString());
     }
 
 
@@ -191,7 +188,6 @@ public class DeviceControlActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         bus.register(this);
         if (mBluetoothLeService != null) {
             final boolean result = mBluetoothLeService.connect(bluetoothDevice.getAddress());
@@ -203,7 +199,6 @@ public class DeviceControlActivity extends Activity {
     protected void onPause() {
         super.onPause();
         bus.unregister(this);
-        unregisterReceiver(mGattUpdateReceiver);
     }
 
     @Override
@@ -267,23 +262,14 @@ public class DeviceControlActivity extends Activity {
     HashMap<String, BluetoothGattCharacteristic> bluetoothGattCharacteristicHashMap = new HashMap<String, BluetoothGattCharacteristic>();
     HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
 
-//    private ArrayList<BluetoothGattCharacteristic> charList = new ArrayList<BluetoothGattCharacteristic>();
 
     // Demonstrates how to iterate through the supported GATT Services/Characteristics.
     // In this sample, we populate the data structure that is bound to the ExpandableListView
     // on the UI.
 
-    private void displayGattServices(Intent intent) {
+    private void displayGattServices() {
         final List<BluetoothGattService> gattServices = mBluetoothLeService.getSupportedGattServices();
         if (gattServices == null) return;
-
-//        String uuid = null;
-//        String unknownServiceString = getResources().getString(R.string.unknown_service);
-//        String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
-//        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
-//        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData = new ArrayList<ArrayList<HashMap<String, String>>>();
-
-//        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
 
         if (gattServices.size() > 0) {
             for (int ii = 0; ii < gattServices.size(); ii++) {
@@ -297,36 +283,33 @@ public class DeviceControlActivity extends Activity {
             }
         }
 
-//        Runnable runnable = new Runnable() {
-//            @Override
-//            public void run() {
         BleGenericSensor bleGenericSensor;
         for (int i = 0; i < gattServices.size(); i++) {
             BluetoothGattService bluetoothGattService = gattServices.get(i);
             boolean result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_HUM_SERV.toString());
-//            if (result) {
-//                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
-//                bleGenericSensor = new SensorTagHumidityProfile(bluetoothGattService.getUuid(), mBluetoothLeService);
-//                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
-//            }
-//            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_IRT_SERV.toString());
-//            if (result) {
-//                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
-//                bleGenericSensor = new IRTSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
-//                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
-//            }
-//            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_BAR_SERV.toString());
-//            if (result) {
-//                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
-//                bleGenericSensor = new BarometerSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
-//                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
-//            }
-//            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_MOV_SERV.toString());
-//            if (result) {
-//                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
-//                bleGenericSensor = new MotionSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
-//                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
-//            }
+            if (result) {
+                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
+                bleGenericSensor = new SensorTagHumidityProfile(bluetoothGattService.getUuid(), mBluetoothLeService);
+                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
+            }
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_IRT_SERV.toString());
+            if (result) {
+                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
+                bleGenericSensor = new IRTSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
+            }
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_BAR_SERV.toString());
+            if (result) {
+                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
+                bleGenericSensor = new BarometerSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
+            }
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_MOV_SERV.toString());
+            if (result) {
+                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
+                bleGenericSensor = new MotionSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
+            }
             result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_KEY_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
@@ -335,33 +318,7 @@ public class DeviceControlActivity extends Activity {
             }
 
         }
-
-//        Executors.newSingleThreadExecutor().submit(runnable);
-        // Loops through available GATT Services.
-
     }
 
 
-    private void waitForResponse() {
-        synchronized (mBluetoothLeService.getSyncObject()) {
-            try {
-                Log.d(TAG, "going to wait");
-                mBluetoothLeService.getSyncObject().wait();
-                Log.d(TAG, "Waiting Done");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    private static IntentFilter makeGattUpdateIntentFilter() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_WRITE);
-        return intentFilter;
-    }
 }

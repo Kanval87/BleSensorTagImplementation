@@ -38,11 +38,12 @@ public abstract class BleGenericSensor {
             @Override
             public void run() {
                 if (!wasNotified) {
-                    Log.w(TAG, "no notifications");
+//                    Log.w(TAG, "no notifications");
                     turnOnService();
                     unableNotifications();
-                } else
-                    Log.w(TAG, "notifications");
+                }
+//                else
+//                    Log.w(TAG, "notifications");
                 wasNotified = false;
                 handler.postDelayed(this, 1000);
             }

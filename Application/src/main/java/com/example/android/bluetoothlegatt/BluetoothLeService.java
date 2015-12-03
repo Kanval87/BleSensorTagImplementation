@@ -50,7 +50,6 @@ public class BluetoothLeService extends Service {
     private EventBus bus = EventBus.getDefault();
 
     private final static String TAG = BluetoothLeService.class.getSimpleName();
-    private static final int GATT_TIMEOUT = 150;
 
 
     private BluetoothManager mBluetoothManager;
@@ -61,16 +60,6 @@ public class BluetoothLeService extends Service {
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
-
-    public static final java.lang.String ACTION_DATA_WRITE = "com.example.bluetooth.le.ACTION_DATA_WRITE";
-    public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
-    public static final String EXTRA_UUID = "com.example.bluetooth.le.EXTRA_UUID";
-
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -80,25 +69,19 @@ public class BluetoothLeService extends Service {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             Log.d(TAG, "onConnectionStateChange");
-            String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 event = new BleEvents(BleEnum.Connected);
-                intentAction = ACTION_GATT_CONNECTED;
-                mConnectionState = STATE_CONNECTED;
-                broadcastUpdate(intentAction);
+                bus.post(event);
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 event = new BleEvents(BleEnum.Disconnected);
-                intentAction = ACTION_GATT_DISCONNECTED;
-                mConnectionState = STATE_DISCONNECTED;
-                Log.i(TAG, "Disconnected from GATT server.");
-                broadcastUpdate(intentAction);
+                bus.post(event);
             }
             // Post the event
-            bus.post(event);
+
         }
 
         @Override
@@ -106,35 +89,35 @@ public class BluetoothLeService extends Service {
             Log.d(TAG, "onServicesDiscovered");
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 event = new BleEvents(BleEnum.ServicesDiscovered);
-                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+                bus.post(event);
+//                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
-            bus.post(event);
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "onCharacteristicRead");
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             event = new BleEvents(BleEnum.DataAvailable);
+            event.setData(characteristic.getValue());
+            event.setUuid(characteristic.getService().getUuid().toString());
             bus.post(event);
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
 //            Log.d(TAG, "onCharacteristicChanged");
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             event = new BleEvents(BleEnum.DataAvailable);
+            event.setData(characteristic.getValue());
+            event.setUuid(characteristic.getService().getUuid().toString());
             bus.post(event);
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "onCharacteristicWrite");
-            broadcastUpdate(ACTION_DATA_WRITE, characteristic);
-            event = new BleEvents(BleEnum.DataWritten);
-            bus.post(event);
+//            broadcastUpdate(ACTION_DATA_WRITE, characteristic);
         }
 
         @Override
@@ -148,34 +131,6 @@ public class BluetoothLeService extends Service {
         }
     };
 
-
-    private Object syncObject = new Object();
-
-    private void broadcastUpdate(final String action) {
-        final Intent intent = new Intent(action);
-        sendBroadcast(intent);
-    }
-
-    private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
-        final Intent intent = new Intent(action);
-
-        // This is special handling for the Heart Rate Measurement profile.  Data parsing is
-        // carried out as per profile specifications:
-        // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-
-        // For all other profiles, writes the data formatted in HEX.
-
-        intent.putExtra(EXTRA_DATA, characteristic.getValue());
-        intent.putExtra(EXTRA_UUID, characteristic.getService().getUuid().toString());
-
-//        Log.d(TAG, "Service :" + characteristic.getService().getUuid().toString() + " |  Charateristic :" + characteristic.getUuid().toString());
-
-        sendBroadcast(intent);
-    }
-
-    public Object getSyncObject() {
-        return syncObject;
-    }
 
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
         return mBluetoothGatt.writeCharacteristic(characteristic);
@@ -379,31 +334,4 @@ public class BluetoothLeService extends Service {
         return mBluetoothGatt.getServices();
     }
 
-    public enum BleRequestOperation {
-        writeBlocking,
-        write,
-        readBlocking,
-        read,
-        notifyBlocking,
-    }
-
-    public enum BleRequestStatus {
-        not_queued,
-        queued,
-        processing,
-        timeout,
-        done,
-        no_such_request,
-        failed,
-    }
-
-    private class BleRequest {
-        public int id;
-        public BluetoothGattCharacteristic characteristic;
-        public BleRequestOperation operation;
-        public volatile BleRequestStatus status;
-        public int timeout;
-        public int curTimeout;
-        public boolean notifyenable;
-    }
 }
