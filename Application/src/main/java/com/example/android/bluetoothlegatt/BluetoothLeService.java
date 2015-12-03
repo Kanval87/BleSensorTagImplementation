@@ -32,15 +32,23 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.android.bluetoothlegatt.events.BleEnum;
+import com.example.android.bluetoothlegatt.events.BleEvents;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
 public class BluetoothLeService extends Service {
+
+    private EventBus bus = EventBus.getDefault();
+
     private final static String TAG = BluetoothLeService.class.getSimpleName();
     private static final int GATT_TIMEOUT = 150;
 
@@ -67,11 +75,14 @@ public class BluetoothLeService extends Service {
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+        BleEvents event;
+
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             Log.d(TAG, "onConnectionStateChange");
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+                event = new BleEvents(BleEnum.Connected);
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
@@ -80,39 +91,50 @@ public class BluetoothLeService extends Service {
                 Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                event = new BleEvents(BleEnum.Disconnected);
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
                 Log.i(TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
             }
+            // Post the event
+            bus.post(event);
         }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             Log.d(TAG, "onServicesDiscovered");
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                event = new BleEvents(BleEnum.ServicesDiscovered);
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
+            bus.post(event);
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "onCharacteristicRead");
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            event = new BleEvents(BleEnum.DataAvailable);
+            bus.post(event);
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
 //            Log.d(TAG, "onCharacteristicChanged");
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            event = new BleEvents(BleEnum.DataAvailable);
+            bus.post(event);
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "onCharacteristicWrite");
             broadcastUpdate(ACTION_DATA_WRITE, characteristic);
+            event = new BleEvents(BleEnum.DataWritten);
+            bus.post(event);
         }
 
         @Override

@@ -38,10 +38,13 @@ import android.widget.TextView;
 
 import com.example.android.bluetoothlegatt.BLEServices.BleGenericSensor;
 import com.example.android.bluetoothlegatt.BLEServices.SimpleKeysSensor;
+import com.example.android.bluetoothlegatt.events.BleEvents;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -50,6 +53,8 @@ import java.util.List;
  * Bluetooth LE API.
  */
 public class DeviceControlActivity extends Activity {
+    private EventBus bus = EventBus.getDefault();
+
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
@@ -119,6 +124,11 @@ public class DeviceControlActivity extends Activity {
     };
 
 
+    public void onEvent(BleEvents event) {
+        Log.d(TAG, event.toString());
+    }
+
+
     // If a given GATT characteristic is selected, check for supported features.  This sample
     // demonstrates 'Read' and 'Notify' features.  See
     // http://d.android.com/reference/android/bluetooth/BluetoothGatt.html for the complete
@@ -182,6 +192,7 @@ public class DeviceControlActivity extends Activity {
     protected void onResume() {
         super.onResume();
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        bus.register(this);
         if (mBluetoothLeService != null) {
             final boolean result = mBluetoothLeService.connect(bluetoothDevice.getAddress());
             Log.d(TAG, "Connect request result=" + result);
@@ -191,6 +202,7 @@ public class DeviceControlActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        bus.unregister(this);
         unregisterReceiver(mGattUpdateReceiver);
     }
 
