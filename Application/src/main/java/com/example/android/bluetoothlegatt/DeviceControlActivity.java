@@ -21,7 +21,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -29,23 +28,22 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ExpandableListView;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 
 import com.example.android.bluetoothlegatt.BLEServices.BarometerSensor;
 import com.example.android.bluetoothlegatt.BLEServices.BleGenericSensor;
 import com.example.android.bluetoothlegatt.BLEServices.IRTSensor;
+import com.example.android.bluetoothlegatt.BLEServices.LuxometerSensor;
 import com.example.android.bluetoothlegatt.BLEServices.MotionSensor;
 import com.example.android.bluetoothlegatt.BLEServices.SensorTagHumidityProfile;
 import com.example.android.bluetoothlegatt.BLEServices.SimpleKeysSensor;
 import com.example.android.bluetoothlegatt.events.BleEvents;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -60,21 +58,29 @@ public class DeviceControlActivity extends Activity {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
-    public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     public static final String EXTRAS_DEVICE = "DEVICE";
 
     private TextView mConnectionState;
-    private TextView mDataField;
     private String mDeviceName;
 
-    private ExpandableListView mGattServicesList;
+    @Bind(R.id.txt_berometer)
+    TextView txtViewBerometer;
+    @Bind(R.id.txt_humidity)
+    TextView txtViewHumidity;
+    @Bind(R.id.txt_irt)
+    TextView txtViewIrt;
+    @Bind(R.id.txt_keys)
+    TextView txtViewKeys;
+    @Bind(R.id.txt_motion)
+    TextView txtViewMotion;
+    @Bind(R.id.txt_luxometer)
+    TextView txtViewLuxometer;
+
 
     private BluetoothLeService mBluetoothLeService;
     private BluetoothDevice bluetoothDevice;
 
-    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private boolean mConnected = false;
-    private BluetoothGattCharacteristic mNotifyCharacteristic;
 
 
     // Code to manage Service lifecycle.
@@ -98,14 +104,6 @@ public class DeviceControlActivity extends Activity {
     };
 
 
-    public void onEvent(BleEvents event) {
-        switch (event.getBleEnum()) {
-            case DataAvailable:
-                displayData(event.getData(), event.getUuid());
-                break;
-        }
-    }
-
     public void onEventMainThread(BleEvents event) {
         switch (event.getBleEnum()) {
             case Connected:
@@ -117,56 +115,26 @@ public class DeviceControlActivity extends Activity {
                 mConnected = false;
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
-                clearUI();
                 break;
             case ServicesDiscovered:
                 displayGattServices();
                 break;
+            case DataAvailable:
+                displayData(event.getData(), event.getUuid());
+                break;
         }
     }
 
 
-    // If a given GATT characteristic is selected, check for supported features.  This sample
-    // demonstrates 'Read' and 'Notify' features.  See
-    // http://d.android.com/reference/android/bluetooth/BluetoothGatt.html for the complete
-    // list of supported characteristic features.
-    private final ExpandableListView.OnChildClickListener servicesListClickListner = new ExpandableListView.OnChildClickListener() {
-        @Override
-        public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-            if (mGattCharacteristics != null) {
-                final BluetoothGattCharacteristic characteristic = mGattCharacteristics.get(groupPosition).get(childPosition);
-                final int charaProp = characteristic.getProperties();
-                if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
-                    // If there is an active notification on a characteristic, clear
-                    // it first so it doesn't update the data field on the user interface.
-                    if (mNotifyCharacteristic != null) {
-                        mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
-                        mNotifyCharacteristic = null;
-                    }
-                    mBluetoothLeService.readCharacteristic(characteristic);
-                }
-                if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-                    mNotifyCharacteristic = characteristic;
-                    mBluetoothLeService.setCharacteristicNotification(characteristic, true);
-                }
-                return true;
-            }
-            return false;
-        }
-    };
-    private Context context = DeviceControlActivity.this;
     private HashMap<String, BluetoothGattCharacteristic> charList = new HashMap<>();
 
-
-    private void clearUI() {
-        mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
-        mDataField.setText(R.string.no_data);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
+
+        ButterKnife.bind(this);
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -174,10 +142,7 @@ public class DeviceControlActivity extends Activity {
 
         // Sets up UI references.
         ((TextView) findViewById(R.id.device_address)).setText(bluetoothDevice.getAddress());
-        mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
-        mGattServicesList.setOnChildClickListener(servicesListClickListner);
         mConnectionState = (TextView) findViewById(R.id.connection_state);
-        mDataField = (TextView) findViewById(R.id.data_value);
 
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -252,14 +217,26 @@ public class DeviceControlActivity extends Activity {
         if (bleGenericSensor != null) {
             bleGenericSensor.convert(data);
             bleGenericSensor.receiveNotification();
-            Log.d(TAG, "Data : " + bleGenericSensor.toString());
+            if (bleGenericSensor instanceof BarometerSensor) {
+                txtViewBerometer.setText(bleGenericSensor.toString());
+            } else if (bleGenericSensor instanceof IRTSensor) {
+                txtViewIrt.setText(bleGenericSensor.toString());
+            } else if (bleGenericSensor instanceof LuxometerSensor) {
+                txtViewLuxometer.setText(bleGenericSensor.toString());
+            } else if (bleGenericSensor instanceof MotionSensor) {
+                txtViewMotion.setText(bleGenericSensor.toString());
+            } else if (bleGenericSensor instanceof SensorTagHumidityProfile) {
+                txtViewHumidity.setText(bleGenericSensor.toString());
+            } else if (bleGenericSensor instanceof SimpleKeysSensor) {
+                txtViewKeys.setText(bleGenericSensor.toString());
+            }
+//            Log.d(TAG, "Data : " + bleGenericSensor.toString());
         } else {
             Log.d(TAG, "None Matched");
         }
 
     }
 
-    HashMap<String, BluetoothGattCharacteristic> bluetoothGattCharacteristicHashMap = new HashMap<String, BluetoothGattCharacteristic>();
     HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
 
 

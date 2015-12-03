@@ -220,12 +220,12 @@ public class SensorTagGatt {
      * Gives the optimal period for the input service.
      */
     public static byte optimalPeriod(String serviceUuid) {
-        if (serviceUuid.equals(UUID_IRT_SERV)) return 10;
-        else if (serviceUuid.equals(UUID_HUM_SERV)) return 10;
-        else if (serviceUuid.equals(UUID_BAR_SERV)) return 10;
-        else if (serviceUuid.equals(UUID_OPT_SERV)) return 10;
-        else if (serviceUuid.equals(UUID_MOV_SERV)) return 10;
-        else return 0;
+        if (serviceUuid.equals(UUID_IRT_SERV)) return (byte) 1000;
+        else if (serviceUuid.equals(UUID_HUM_SERV)) return (byte) 1000;
+        else if (serviceUuid.equals(UUID_BAR_SERV)) return (byte) 1000;
+        else if (serviceUuid.equals(UUID_OPT_SERV)) return (byte) 1000;
+        else if (serviceUuid.equals(UUID_MOV_SERV)) return (byte) 1000;
+        else return (byte) 1000;
     }
 
     /**
