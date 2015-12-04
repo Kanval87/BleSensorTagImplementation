@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -64,8 +65,6 @@ public class DeviceControlActivity extends Activity {
     private final int TotalSize = 6;
     @Bind(R.id.txt_humidity)
     TextView txtViewHumidity;
-    @Bind(R.id.txt_keys)
-    TextView txtViewKeys;
     @Bind(R.id.txt_motion)
     TextView txtViewMotion;
     @Bind(R.id.txt_luxometer)
@@ -74,9 +73,12 @@ public class DeviceControlActivity extends Activity {
     ValueLineChart valueBarometerLineChart;
     @Bind(R.id.cubiclinechart_irt)
     ValueLineChart valueIrtLineChart;
+    @Bind(R.id.cubiclinechart_keys)
+    ValueLineChart valueKeyLineChart;
     HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
     ValueLineSeries beroSeries = new ValueLineSeries();
     ValueLineSeries irtSeries = new ValueLineSeries();
+    ValueLineSeries keySeries = new ValueLineSeries();
     private EventBus bus = EventBus.getDefault();
     private TextView mConnectionState;
     private String mDeviceName;
@@ -147,21 +149,28 @@ public class DeviceControlActivity extends Activity {
         ((TextView) findViewById(R.id.device_address)).setText(bluetoothDevice.getAddress());
         mConnectionState = (TextView) findViewById(R.id.connection_state);
 
-        beroSeries.setColor(0xFF56B7F1);
-        irtSeries.setColor(0x5556B7F1);
+        beroSeries.setColor(Color.CYAN);
+        irtSeries.setColor(Color.YELLOW);
+        keySeries.setColor(Color.BLUE);
         for (int i = 0; i < TotalSize; i++) {
-            ValueLinePoint valueLinePoint = new ValueLinePoint("Bero", 0f);
+            ValueLinePoint valueLinePoint = new ValueLinePoint("", 0f);
             beroSeries.addPoint(valueLinePoint);
             irtSeries.addPoint(valueLinePoint);
+            keySeries.addPoint(valueLinePoint);
         }
 
-        valueBarometerLineChart.setIndicatorTextUnit("rh");
+        valueBarometerLineChart.setIndicatorTextUnit("mBar");
         valueBarometerLineChart.addSeries(beroSeries);
         valueBarometerLineChart.startAnimation();
 
         valueIrtLineChart.setIndicatorTextUnit("C");
         valueIrtLineChart.addSeries(irtSeries);
         valueIrtLineChart.startAnimation();
+
+        valueKeyLineChart.setIndicatorTextUnit("Key");
+        valueKeyLineChart.addSeries(keySeries);
+        valueKeyLineChart.startAnimation();
+
 
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -284,10 +293,14 @@ public class DeviceControlActivity extends Activity {
                 });
 
             } else if (bleGenericSensor instanceof SimpleKeysSensor) {
+                ValueLineSeries lineSeries = valueKeyLineChart.getDataSeries().get(0);
+                List<ValueLinePoint> valueLinePoints = lineSeries.getSeries();
+                valueLinePoints.remove(0);
+                valueLinePoints.add(new ValueLinePoint("Key", (float) point3D.x));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        txtViewKeys.setText(bleGenericSensor.toString());
+                        valueKeyLineChart.update();
                     }
                 });
 
@@ -353,7 +366,12 @@ public class DeviceControlActivity extends Activity {
                 bleGenericSensor = new SimpleKeysSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
-
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_OPT_SERV.toString());
+            if (result) {
+                Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
+                bleGenericSensor = new LuxometerSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
+            }
         }
     }
 

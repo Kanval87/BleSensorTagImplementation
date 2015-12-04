@@ -22,7 +22,7 @@ public class SimpleKeysSensor extends BleGenericSensor {
     public Point3D convert(byte[] value) {
         byte b = value[0];
         key = b;
-        return null;
+        return new Point3D((double) key, 0, 0);
     }
 
     @Override
