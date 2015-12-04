@@ -38,6 +38,11 @@ import com.example.android.bluetoothlegatt.BLEServices.Implementation.MotionSens
 import com.example.android.bluetoothlegatt.BLEServices.Implementation.SensorTagHumidityProfile;
 import com.example.android.bluetoothlegatt.BLEServices.Implementation.SimpleKeysSensor;
 import com.example.android.bluetoothlegatt.events.BleEvents;
+import com.example.android.bluetoothlegatt.utils.Point3D;
+
+import org.eazegraph.lib.charts.ValueLineChart;
+import org.eazegraph.lib.models.ValueLinePoint;
+import org.eazegraph.lib.models.ValueLineSeries;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,19 +61,22 @@ public class DeviceControlActivity extends Activity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE = "DEVICE";
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
-    @Bind(R.id.txt_berometer)
-    TextView txtViewBerometer;
+    private final int TotalSize = 6;
     @Bind(R.id.txt_humidity)
     TextView txtViewHumidity;
-    @Bind(R.id.txt_irt)
-    TextView txtViewIrt;
     @Bind(R.id.txt_keys)
     TextView txtViewKeys;
     @Bind(R.id.txt_motion)
     TextView txtViewMotion;
     @Bind(R.id.txt_luxometer)
     TextView txtViewLuxometer;
+    @Bind(R.id.cubiclinechart_berometer)
+    ValueLineChart valueBarometerLineChart;
+    @Bind(R.id.cubiclinechart_irt)
+    ValueLineChart valueIrtLineChart;
     HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
+    ValueLineSeries beroSeries = new ValueLineSeries();
+    ValueLineSeries irtSeries = new ValueLineSeries();
     private EventBus bus = EventBus.getDefault();
     private TextView mConnectionState;
     private String mDeviceName;
@@ -93,12 +101,18 @@ public class DeviceControlActivity extends Activity {
             mBluetoothLeService = null;
         }
     };
-
-    //    public void onEvent(BleEvents event) {
-//
-//    }
     private boolean mConnected = false;
     private HashMap<String, BluetoothGattCharacteristic> charList = new HashMap<>();
+
+    public void onEvent(BleEvents event) {
+
+        switch (event.getBleEnum()) {
+            case DataAvailable:
+                displayData(event.getData(), event.getUuid());
+                break;
+        }
+
+    }
 
     public void onEventMainThread(BleEvents event) {
         switch (event.getBleEnum()) {
@@ -114,9 +128,6 @@ public class DeviceControlActivity extends Activity {
                 break;
             case ServicesDiscovered:
                 displayGattServices();
-                break;
-            case DataAvailable:
-                displayData(event.getData(), event.getUuid());
                 break;
         }
     }
@@ -135,6 +146,22 @@ public class DeviceControlActivity extends Activity {
         // Sets up UI references.
         ((TextView) findViewById(R.id.device_address)).setText(bluetoothDevice.getAddress());
         mConnectionState = (TextView) findViewById(R.id.connection_state);
+
+        beroSeries.setColor(0xFF56B7F1);
+        irtSeries.setColor(0x5556B7F1);
+        for (int i = 0; i < TotalSize; i++) {
+            ValueLinePoint valueLinePoint = new ValueLinePoint("Bero", 0f);
+            beroSeries.addPoint(valueLinePoint);
+            irtSeries.addPoint(valueLinePoint);
+        }
+
+        valueBarometerLineChart.setIndicatorTextUnit("rh");
+        valueBarometerLineChart.addSeries(beroSeries);
+        valueBarometerLineChart.startAnimation();
+
+        valueIrtLineChart.setIndicatorTextUnit("C");
+        valueIrtLineChart.addSeries(irtSeries);
+        valueIrtLineChart.startAnimation();
 
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -203,24 +230,67 @@ public class DeviceControlActivity extends Activity {
         });
     }
 
+
     private void displayData(byte[] data, String uuid) {
 
-        BleGenericSensor bleGenericSensor = stringBleGenericSensorHashMap.get(uuid);
+        final BleGenericSensor bleGenericSensor = stringBleGenericSensorHashMap.get(uuid);
         if (bleGenericSensor != null) {
-            bleGenericSensor.convert(data);
+            Point3D point3D = bleGenericSensor.convert(data);
             bleGenericSensor.receiveNotification();
             if (bleGenericSensor instanceof BarometerSensor) {
-                txtViewBerometer.setText(bleGenericSensor.toString());
+                ValueLineSeries lineSeries = valueBarometerLineChart.getDataSeries().get(0);
+                List<ValueLinePoint> valueLinePoints = lineSeries.getSeries();
+                valueLinePoints.remove(0);
+                valueLinePoints.add(new ValueLinePoint("bero", (float) point3D.x));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        valueBarometerLineChart.update();
+                    }
+                });
             } else if (bleGenericSensor instanceof IRTSensor) {
-                txtViewIrt.setText(bleGenericSensor.toString());
+                ValueLineSeries lineSeries = valueIrtLineChart.getDataSeries().get(0);
+                List<ValueLinePoint> valueLinePoints = lineSeries.getSeries();
+                valueLinePoints.remove(0);
+                valueLinePoints.add(new ValueLinePoint("Ambient", (float) point3D.z));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        valueIrtLineChart.update();
+                    }
+                });
             } else if (bleGenericSensor instanceof LuxometerSensor) {
-                txtViewLuxometer.setText(bleGenericSensor.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtViewLuxometer.setText(bleGenericSensor.toString());
+                    }
+                });
+
             } else if (bleGenericSensor instanceof MotionSensor) {
-                txtViewMotion.setText(bleGenericSensor.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtViewMotion.setText(bleGenericSensor.toString());
+                    }
+                });
+
             } else if (bleGenericSensor instanceof SensorTagHumidityProfile) {
-                txtViewHumidity.setText(bleGenericSensor.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtViewHumidity.setText(bleGenericSensor.toString());
+                    }
+                });
+
             } else if (bleGenericSensor instanceof SimpleKeysSensor) {
-                txtViewKeys.setText(bleGenericSensor.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtViewKeys.setText(bleGenericSensor.toString());
+                    }
+                });
+
             }
 //            Log.d(TAG, "Data : " + bleGenericSensor.toString());
         } else {

@@ -13,202 +13,193 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_margin="10dp"
-              android:orientation="vertical">
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:layout_margin="10dp"
+                                            android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_device_address"
-            android:textSize="18sp"/>
-
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/device_address"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_device_address"
+                android:textSize="18sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_state"
-            android:textSize="18sp"/>
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"/>
 
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/device_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/connection_state"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/disconnected"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_state"
+                android:textSize="18sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/barometer_data"
-            android:textSize="18sp"/>
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"/>
 
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/connection_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/disconnected"
+                android:textSize="18sp"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txt_berometer"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <org.eazegraph.lib.charts.ValueLineChart
+                android:id="@+id/cubiclinechart_berometer"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                app:egIndicatorLineColor="#FE6DA8"
+                app:egLegendHeight="40dp"
+                app:egShowStandardValue="true"
+                app:egUseOverlapFill="true"/>
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/irt_data"
-            android:textSize="18sp"/>
-
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/txt_irt"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <org.eazegraph.lib.charts.ValueLineChart
+                android:id="@+id/cubiclinechart_irt"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                app:egIndicatorLineColor="#FE6DA8"
+                app:egLegendHeight="40dp"
+                app:egShowStandardValue="true"
+                app:egUseOverlapFill="true"/>
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/motion_data"
-            android:textSize="18sp"/>
-
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/txt_motion"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/motion_data"
+                android:textSize="18sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/humidity_data"
-            android:textSize="18sp"/>
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"/>
 
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txt_motion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:textSize="18sp"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txt_humidity"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/humidity_data"
+                android:textSize="18sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/key_data"
-            android:textSize="18sp"/>
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"/>
 
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txt_humidity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:textSize="18sp"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txt_keys"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/key_data"
+                android:textSize="18sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/luxometer_data"
-            android:textSize="18sp"/>
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"/>
 
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txt_keys"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:textSize="18sp"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txt_luxometer"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textSize="18sp"/>
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/luxometer_data"
+                android:textSize="18sp"/>
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txt_luxometer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:textSize="18sp"/>
+        </LinearLayout>
     </LinearLayout>
 
-
-</LinearLayout>
+</android.support.v4.widget.NestedScrollView>
