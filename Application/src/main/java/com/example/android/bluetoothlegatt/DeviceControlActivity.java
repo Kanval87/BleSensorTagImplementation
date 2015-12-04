@@ -30,13 +30,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.example.android.bluetoothlegatt.BLEServices.BarometerSensor;
 import com.example.android.bluetoothlegatt.BLEServices.BleGenericSensor;
-import com.example.android.bluetoothlegatt.BLEServices.IRTSensor;
-import com.example.android.bluetoothlegatt.BLEServices.LuxometerSensor;
-import com.example.android.bluetoothlegatt.BLEServices.MotionSensor;
-import com.example.android.bluetoothlegatt.BLEServices.SensorTagHumidityProfile;
-import com.example.android.bluetoothlegatt.BLEServices.SimpleKeysSensor;
+import com.example.android.bluetoothlegatt.BLEServices.Implementation.BarometerSensor;
+import com.example.android.bluetoothlegatt.BLEServices.Implementation.IRTSensor;
+import com.example.android.bluetoothlegatt.BLEServices.Implementation.LuxometerSensor;
+import com.example.android.bluetoothlegatt.BLEServices.Implementation.MotionSensor;
+import com.example.android.bluetoothlegatt.BLEServices.Implementation.SensorTagHumidityProfile;
+import com.example.android.bluetoothlegatt.BLEServices.Implementation.SimpleKeysSensor;
 import com.example.android.bluetoothlegatt.events.BleEvents;
 
 import java.util.HashMap;
@@ -53,16 +53,9 @@ import de.greenrobot.event.EventBus;
  * Bluetooth LE API.
  */
 public class DeviceControlActivity extends Activity {
-    private EventBus bus = EventBus.getDefault();
-
-    private final static String TAG = DeviceControlActivity.class.getSimpleName();
-
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE = "DEVICE";
-
-    private TextView mConnectionState;
-    private String mDeviceName;
-
+    private final static String TAG = DeviceControlActivity.class.getSimpleName();
     @Bind(R.id.txt_berometer)
     TextView txtViewBerometer;
     @Bind(R.id.txt_humidity)
@@ -75,14 +68,12 @@ public class DeviceControlActivity extends Activity {
     TextView txtViewMotion;
     @Bind(R.id.txt_luxometer)
     TextView txtViewLuxometer;
-
-
+    HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
+    private EventBus bus = EventBus.getDefault();
+    private TextView mConnectionState;
+    private String mDeviceName;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothDevice bluetoothDevice;
-
-    private boolean mConnected = false;
-
-
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -103,6 +94,11 @@ public class DeviceControlActivity extends Activity {
         }
     };
 
+    //    public void onEvent(BleEvents event) {
+//
+//    }
+    private boolean mConnected = false;
+    private HashMap<String, BluetoothGattCharacteristic> charList = new HashMap<>();
 
     public void onEventMainThread(BleEvents event) {
         switch (event.getBleEnum()) {
@@ -124,10 +120,6 @@ public class DeviceControlActivity extends Activity {
                 break;
         }
     }
-
-
-    private HashMap<String, BluetoothGattCharacteristic> charList = new HashMap<>();
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -236,8 +228,6 @@ public class DeviceControlActivity extends Activity {
         }
 
     }
-
-    HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
 
 
     // Demonstrates how to iterate through the supported GATT Services/Characteristics.
