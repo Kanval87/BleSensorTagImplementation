@@ -11,6 +11,7 @@ import java.util.UUID;
  */
 public class MotionSensor extends BleGenericSensor {
 
+    Point3D[] point3D = new Point3D[2];
     private Point3D accelerometer;
     private Point3D gyroscope;
     private Point3D magnetometer;
@@ -30,6 +31,16 @@ public class MotionSensor extends BleGenericSensor {
         if (this.measure == 1) return this.accelerometer;
         else if (this.measure == 2) return this.gyroscope;
         else return this.magnetometer;
+    }
+
+    public Point3D[] convertForArray(byte[] value) {
+        this.accelerometer = convertAccelerator(value);
+        this.gyroscope = convertGyroscope(value);
+        this.magnetometer = convertMagnetometer(value);
+        point3D[0] = this.accelerometer;
+        point3D[1] = this.gyroscope;
+        point3D[2] = this.magnetometer;
+        return point3D;
     }
 
     private Point3D convertAccelerator(byte[] value) {

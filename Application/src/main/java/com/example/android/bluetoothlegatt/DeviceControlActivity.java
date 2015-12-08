@@ -243,11 +243,13 @@ public class DeviceControlActivity extends Activity {
 
         final BleGenericSensor bleGenericSensor = stringBleGenericSensorHashMap.get(uuid);
         if (bleGenericSensor != null) {
-            Point3D point3D = bleGenericSensor.convert(data);
+            Point3D point3D = null;
             bleGenericSensor.receiveNotification();
             if (bleGenericSensor instanceof BarometerSensor) {
+                point3D = bleGenericSensor.convert(data);
                 ((SensorDataListerner) beroMeterSensorFragment).displayData(point3D);
             } else if (bleGenericSensor instanceof IRTSensor) {
+                point3D = bleGenericSensor.convert(data);
                 ((SensorDataListerner) irtFragment).displayData(point3D);
             } else if (bleGenericSensor instanceof LuxometerSensor) {
                 runOnUiThread(new Runnable() {
@@ -258,6 +260,7 @@ public class DeviceControlActivity extends Activity {
                 });
 
             } else if (bleGenericSensor instanceof MotionSensor) {
+                Point3D[] point3Ds = ((MotionSensor) bleGenericSensor).convertForArray(data);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

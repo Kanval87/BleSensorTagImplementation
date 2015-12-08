@@ -5,4 +5,6 @@ import com.example.android.bluetoothlegatt.utils.Point3D;
 public interface SensorDataListerner {
 
     void displayData(Point3D point3D);
+
+    void displayData(Point3D[] point3Ds);
 }

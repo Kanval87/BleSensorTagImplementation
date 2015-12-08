@@ -88,6 +88,13 @@
             android:layout_margin="10dp"/>
 
 
+        <fragment
+            android:id="@+id/motion_fragment"
+            class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.MotionFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
