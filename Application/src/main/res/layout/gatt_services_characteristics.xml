@@ -71,39 +71,22 @@
                 android:textSize="18sp"/>
         </LinearLayout>
 
-        <LinearLayout
+
+        <fragment
+            android:id="@+id/berometer_fragment"
+            class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.BarometerFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
+            android:layout_margin="10dp"/>
 
-            <org.eazegraph.lib.charts.ValueLineChart
-                android:id="@+id/cubiclinechart_berometer"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                app:egIndicatorLineColor="#FE6DA8"
-                app:egLegendHeight="40dp"
-                app:egShowStandardValue="true"
-                app:egUseOverlapFill="true"/>
-        </LinearLayout>
 
-        <LinearLayout
+        <fragment
+            android:id="@+id/irt_fragment"
+            class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.IrtFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
+            android:layout_margin="10dp"/>
 
-            <org.eazegraph.lib.charts.ValueLineChart
-                android:id="@+id/cubiclinechart_irt"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                app:egIndicatorLineColor="#FE6DA8"
-                app:egLegendHeight="40dp"
-                app:egShowStandardValue="true"
-                app:egUseOverlapFill="true"/>
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

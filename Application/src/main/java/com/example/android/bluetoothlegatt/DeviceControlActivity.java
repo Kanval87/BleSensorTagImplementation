@@ -38,6 +38,10 @@ import com.example.android.bluetoothlegatt.BLEServices.Implementation.LuxometerS
 import com.example.android.bluetoothlegatt.BLEServices.Implementation.MotionSensor;
 import com.example.android.bluetoothlegatt.BLEServices.Implementation.SensorTagHumidityProfile;
 import com.example.android.bluetoothlegatt.BLEServices.Implementation.SimpleKeysSensor;
+import com.example.android.bluetoothlegatt.BLEServices.SensorFragments.AbstractSensor.AbstractSensor;
+import com.example.android.bluetoothlegatt.BLEServices.SensorFragments.AbstractSensor.SensorDataListerner;
+import com.example.android.bluetoothlegatt.BLEServices.SensorFragments.BarometerFragment;
+import com.example.android.bluetoothlegatt.BLEServices.SensorFragments.IrtFragment;
 import com.example.android.bluetoothlegatt.events.BleEvents;
 import com.example.android.bluetoothlegatt.utils.Point3D;
 
@@ -61,23 +65,20 @@ import de.greenrobot.event.EventBus;
 public class DeviceControlActivity extends Activity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE = "DEVICE";
+    public static final int TotalSize = 6;
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
-    private final int TotalSize = 6;
     @Bind(R.id.txt_humidity)
     TextView txtViewHumidity;
     @Bind(R.id.txt_motion)
     TextView txtViewMotion;
     @Bind(R.id.txt_luxometer)
     TextView txtViewLuxometer;
-    @Bind(R.id.cubiclinechart_berometer)
-    ValueLineChart valueBarometerLineChart;
-    @Bind(R.id.cubiclinechart_irt)
-    ValueLineChart valueIrtLineChart;
+
+    AbstractSensor beroMeterSensorFragment, irtFragment;
     @Bind(R.id.cubiclinechart_keys)
     ValueLineChart valueKeyLineChart;
     HashMap<String, BleGenericSensor> stringBleGenericSensorHashMap = new HashMap<>();
-    ValueLineSeries beroSeries = new ValueLineSeries();
-    ValueLineSeries irtSeries = new ValueLineSeries();
+    //    ValueLineSeries beroSeries = new ValueLineSeries();
     ValueLineSeries keySeries = new ValueLineSeries();
     private EventBus bus = EventBus.getDefault();
     private TextView mConnectionState;
@@ -149,23 +150,21 @@ public class DeviceControlActivity extends Activity {
         ((TextView) findViewById(R.id.device_address)).setText(bluetoothDevice.getAddress());
         mConnectionState = (TextView) findViewById(R.id.connection_state);
 
-        beroSeries.setColor(Color.CYAN);
-        irtSeries.setColor(Color.YELLOW);
+//        beroSeries.setColor(Color.CYAN);
         keySeries.setColor(Color.BLUE);
         for (int i = 0; i < TotalSize; i++) {
             ValueLinePoint valueLinePoint = new ValueLinePoint("", 0f);
-            beroSeries.addPoint(valueLinePoint);
-            irtSeries.addPoint(valueLinePoint);
+//            beroSeries.addPoint(valueLinePoint);
             keySeries.addPoint(valueLinePoint);
         }
 
-        valueBarometerLineChart.setIndicatorTextUnit("mBar");
-        valueBarometerLineChart.addSeries(beroSeries);
-        valueBarometerLineChart.startAnimation();
+//        valueBarometerLineChart.setIndicatorTextUnit("mBar");
+//        valueBarometerLineChart.addSeries(beroSeries);
+//        valueBarometerLineChart.startAnimation();
 
-        valueIrtLineChart.setIndicatorTextUnit("C");
-        valueIrtLineChart.addSeries(irtSeries);
-        valueIrtLineChart.startAnimation();
+        beroMeterSensorFragment = (BarometerFragment) getFragmentManager().findFragmentById(R.id.berometer_fragment);
+        irtFragment = (IrtFragment) getFragmentManager().findFragmentById(R.id.irt_fragment);
+
 
         valueKeyLineChart.setIndicatorTextUnit("Key");
         valueKeyLineChart.addSeries(keySeries);
@@ -247,27 +246,9 @@ public class DeviceControlActivity extends Activity {
             Point3D point3D = bleGenericSensor.convert(data);
             bleGenericSensor.receiveNotification();
             if (bleGenericSensor instanceof BarometerSensor) {
-                ValueLineSeries lineSeries = valueBarometerLineChart.getDataSeries().get(0);
-                List<ValueLinePoint> valueLinePoints = lineSeries.getSeries();
-                valueLinePoints.remove(0);
-                valueLinePoints.add(new ValueLinePoint("bero", (float) point3D.x));
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        valueBarometerLineChart.update();
-                    }
-                });
+                ((SensorDataListerner) beroMeterSensorFragment).displayData(point3D);
             } else if (bleGenericSensor instanceof IRTSensor) {
-                ValueLineSeries lineSeries = valueIrtLineChart.getDataSeries().get(0);
-                List<ValueLinePoint> valueLinePoints = lineSeries.getSeries();
-                valueLinePoints.remove(0);
-                valueLinePoints.add(new ValueLinePoint("Ambient", (float) point3D.z));
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        valueIrtLineChart.update();
-                    }
-                });
+                ((SensorDataListerner) irtFragment).displayData(point3D);
             } else if (bleGenericSensor instanceof LuxometerSensor) {
                 runOnUiThread(new Runnable() {
                     @Override
