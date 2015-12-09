@@ -23,11 +23,11 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class BarometerFragment extends AbstractSensor {
+public class LuxometerFragment extends AbstractSensor {
 
     @Bind(R.id.cubiclinechart)
-    ValueLineChart valueBarometerLineChart;
-    ValueLineSeries beroSeries = new ValueLineSeries();
+    ValueLineChart valueIrtLineChart;
+    ValueLineSeries lineSeries = new ValueLineSeries();
     Handler handler = new Handler(Looper.getMainLooper());
 
     @Nullable
@@ -42,28 +42,29 @@ public class BarometerFragment extends AbstractSensor {
         ButterKnife.bind(this, view);
 
 
-        beroSeries.setColor(Color.CYAN);
+        lineSeries.setColor(Color.MAGENTA);
         for (int i = 0; i < DeviceControlActivity.TotalSize; i++) {
             ValueLinePoint valueLinePoint = new ValueLinePoint("", 0f);
-            beroSeries.addPoint(valueLinePoint);
+            lineSeries.addPoint(valueLinePoint);
         }
 
-        valueBarometerLineChart.setIndicatorTextUnit("mBar");
-        valueBarometerLineChart.addSeries(beroSeries);
-        valueBarometerLineChart.startAnimation();
+
+        valueIrtLineChart.setIndicatorTextUnit("Luxometer");
+        valueIrtLineChart.addSeries(lineSeries);
+        valueIrtLineChart.startAnimation();
     }
 
 
     @Override
     public void displayData(Point3D point3D) {
-        ValueLineSeries lineSeries = valueBarometerLineChart.getDataSeries().get(0);
+        ValueLineSeries lineSeries = valueIrtLineChart.getDataSeries().get(0);
         List<ValueLinePoint> valueLinePoints = lineSeries.getSeries();
         valueLinePoints.remove(0);
-        valueLinePoints.add(new ValueLinePoint("bero", (float) point3D.x));
+        valueLinePoints.add(new ValueLinePoint("Lux", (float) point3D.x));
         handler.post(new Runnable() {
             @Override
             public void run() {
-                valueBarometerLineChart.update();
+                valueIrtLineChart.update();
             }
         });
     }

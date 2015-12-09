@@ -11,7 +11,7 @@ import java.util.UUID;
  */
 public class MotionSensor extends BleGenericSensor {
 
-    Point3D[] point3D = new Point3D[2];
+    Point3D[] point3D = new Point3D[3];
     private Point3D accelerometer;
     private Point3D gyroscope;
     private Point3D magnetometer;

@@ -68,4 +68,9 @@ public class IrtFragment extends AbstractSensor {
             }
         });
     }
+
+    @Override
+    public void displayData(Point3D[] point3Ds) {
+
+    }
 }

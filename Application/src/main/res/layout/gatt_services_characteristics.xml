@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"
@@ -77,7 +78,8 @@
             class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.BarometerFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"/>
+            android:layout_margin="10dp"
+            tools:layout="@layout/sensor_graph_fragement_layout"/>
 
 
         <fragment
@@ -85,7 +87,8 @@
             class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.IrtFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"/>
+            android:layout_margin="10dp"
+            tools:layout="@layout/sensor_graph_fragement_layout"/>
 
 
         <fragment
@@ -93,96 +96,34 @@
             class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.MotionFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"/>
+            android:layout_margin="10dp"
+            tools:layout="@layout/sensor_stackedbar_fragement_layout"/>
 
-        <LinearLayout
+
+        <fragment
+            android:id="@+id/humidity_fragment"
+            class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.HumidityFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:orientation="horizontal">
+            tools:layout="@layout/sensor_graph_fragement_layout"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/motion_data"
-                android:textSize="18sp"/>
 
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/txt_motion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/no_data"
-                android:textSize="18sp"/>
-        </LinearLayout>
-
-        <LinearLayout
+        <fragment
+            android:id="@+id/key_fragment"
+            class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.KeyFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:orientation="horizontal">
+            tools:layout="@layout/sensor_graph_fragement_layout"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/humidity_data"
-                android:textSize="18sp"/>
-
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/txt_humidity"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/no_data"
-                android:textSize="18sp"/>
-        </LinearLayout>
-
-        <LinearLayout
+        <fragment
+            android:id="@+id/luxometer_fragment"
+            class="com.example.android.bluetoothlegatt.BLEServices.SensorFragments.LuxometerFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:orientation="horizontal">
-
-            <org.eazegraph.lib.charts.ValueLineChart
-                android:id="@+id/cubiclinechart_keys"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                app:egIndicatorLineColor="#FE6DA8"
-                app:egLegendHeight="40dp"
-                app:egShowStandardValue="true"
-                app:egUseOverlapFill="true"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/luxometer_data"
-                android:textSize="18sp"/>
-
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/txt_luxometer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/no_data"
-                android:textSize="18sp"/>
-        </LinearLayout>
+            tools:layout="@layout/sensor_graph_fragement_layout"/>
     </LinearLayout>
 
 </ScrollView>

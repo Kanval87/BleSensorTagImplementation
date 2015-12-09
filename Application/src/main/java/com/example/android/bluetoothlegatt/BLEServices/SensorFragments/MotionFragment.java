@@ -17,8 +17,6 @@ import org.eazegraph.lib.charts.StackedBarChart;
 import org.eazegraph.lib.models.BarModel;
 import org.eazegraph.lib.models.StackedBarModel;
 
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -90,37 +88,32 @@ public class MotionFragment extends AbstractSensor {
 
     @Override
     public void displayData(Point3D[] point3Ds) {
-        List<StackedBarModel> stackedBarModels = stackedBarChart.getData();
-        stackedBarModels.remove(0);
-        stackedBarModels.remove(0);
-        stackedBarModels.remove(0);
 
-        StackedBarModel stackedBarModel;
+        final StackedBarModel finalStackedBarModel0 = new StackedBarModel("Accelerometer");
+        finalStackedBarModel0.addBar(new BarModel((float) point3Ds[0].x, Color.GRAY));
+        finalStackedBarModel0.addBar(new BarModel((float) point3Ds[0].y, Color.BLUE));
+        finalStackedBarModel0.addBar(new BarModel((float) point3Ds[0].z, Color.RED));
 
-        stackedBarModel = new StackedBarModel("Accelerometer");
-        stackedBarModel.addBar(new BarModel((float) point3Ds[0].x, Color.GRAY));
-        stackedBarModel.addBar(new BarModel((float) point3Ds[0].y, Color.BLUE));
-        stackedBarModel.addBar(new BarModel((float) point3Ds[0].z, Color.RED));
 
-        stackedBarChart.addBar(stackedBarModel);
+        final StackedBarModel finalStackedBarModel1 = new StackedBarModel("Gyroscope");
+        finalStackedBarModel1.addBar(new BarModel((float) point3Ds[1].x, Color.GRAY));
+        finalStackedBarModel1.addBar(new BarModel((float) point3Ds[1].y, Color.BLUE));
+        finalStackedBarModel1.addBar(new BarModel((float) point3Ds[1].z, Color.RED));
 
-        stackedBarModel = new StackedBarModel("Gyroscope");
-        stackedBarModel.addBar(new BarModel((float) point3Ds[1].x, Color.GRAY));
-        stackedBarModel.addBar(new BarModel((float) point3Ds[1].y, Color.BLUE));
-        stackedBarModel.addBar(new BarModel((float) point3Ds[1].z, Color.RED));
 
-        stackedBarChart.addBar(stackedBarModel);
+        final StackedBarModel finalStackedBarModel2 = new StackedBarModel("Megnometer");
+        finalStackedBarModel2.addBar(new BarModel((float) point3Ds[2].x, Color.GRAY));
+        finalStackedBarModel2.addBar(new BarModel((float) point3Ds[2].y, Color.BLUE));
+        finalStackedBarModel2.addBar(new BarModel((float) point3Ds[2].z, Color.RED));
 
-        stackedBarModel = new StackedBarModel("Megnometer");
-        stackedBarModel.addBar(new BarModel((float) point3Ds[2].x, Color.GRAY));
-        stackedBarModel.addBar(new BarModel((float) point3Ds[2].y, Color.BLUE));
-        stackedBarModel.addBar(new BarModel((float) point3Ds[2].z, Color.RED));
-
-        stackedBarChart.addBar(stackedBarModel);
 
         handler.post(new Runnable() {
             @Override
             public void run() {
+                stackedBarChart.clearChart();
+                stackedBarChart.addBar(finalStackedBarModel0);
+                stackedBarChart.addBar(finalStackedBarModel1);
+                stackedBarChart.addBar(finalStackedBarModel2);
                 stackedBarChart.update();
             }
         });
