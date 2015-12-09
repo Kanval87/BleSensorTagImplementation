@@ -3,7 +3,6 @@ package com.example.android.bluetoothlegatt.BLEServices;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.os.Handler;
-import android.util.Log;
 
 import com.example.android.bluetoothlegatt.BluetoothLeService;
 import com.example.android.bluetoothlegatt.SensorTagGatt;
@@ -17,49 +16,22 @@ import java.util.UUID;
 public abstract class BleGenericSensor {
 
     private final static String TAG = BleGenericSensor.class.getSimpleName();
-
-    // Indicator.
-    public boolean wasInitialized = false;
     // Service & Characteristics UUIDs.
     private final UUID serviceUuid;
-    // Bluetooth instances.
-    private BluetoothLeService mBluetoothLeService;
+    // Indicator.
+    public boolean wasInitialized = false;
     //Bluetooth address for this particular sensor
 //    private String mBluetoothLeDeviceAddress;
     // Special for motion sensor.
     public int measure; //1=acc,2=gyr,3=mag
+    boolean shouldTurnOnService = true;
+    boolean shouldEnableNotification = true;
+    // Bluetooth instances.
+    private BluetoothLeService mBluetoothLeService;
     // Check for a received notification every second.
     private Handler handler;
     private boolean wasNotified;
     private boolean shouldSetPeriod = true;
-
-    public void checkForNotification() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!wasNotified) {
-//                    Log.w(TAG, "no notifications");
-                    turnOnService();
-                    unableNotifications();
-                }
-//                else
-//                    Log.w(TAG, "notifications");
-                wasNotified = false;
-                handler.postDelayed(this, 1000);
-            }
-        }, 1000);
-    }
-
-    public void receiveNotification() {
-        this.wasNotified = true;
-    }
-
-    /**
-     * Disable sensor.
-     */
-    public void disable() {
-        this.handler.removeCallbacksAndMessages(null);
-    }
 
     /**
      * Basic constructor.
@@ -80,13 +52,84 @@ public abstract class BleGenericSensor {
         // Set this sensor's period.
         setPeriod();
         // Start the notifications checking.
-        this.handler = new Handler();
+//        this.handler = new Handler();
         this.wasNotified = false;
 
         checkForNotification();
     }
 
-    boolean shouldTurnOnService = true;
+    /**
+     * Gyroscope, Magnetometer, Barometer, IR temperature all store 16 bit two's complement values as LSB MSB, which cannot be directly parsed
+     * as getIntValue(FORMAT_SINT16, offset) because the bytes are stored as little-endian.
+     * <p/>
+     * This function extracts these 16 bit two's complement values.
+     */
+    protected static Integer shortSignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer upperByte = (int) c[offset + 1]; // // Interpret MSB as signed
+        return (upperByte << 8) + lowerByte;
+    }
+
+    protected static Integer shortUnsignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer upperByte = (int) c[offset + 1] & 0xFF; // // Interpret MSB as signed
+        return (upperByte << 8) + lowerByte;
+    }
+
+    protected static Integer twentyFourBitUnsignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer mediumByte = (int) c[offset + 1] & 0xFF;
+        Integer upperByte = (int) c[offset + 2] & 0xFF;
+        return (upperByte << 16) + (mediumByte << 8) + lowerByte;
+    }
+
+    public void checkForNotification() {
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (!wasNotified) {
+                    turnOnService();
+                    unableNotifications();
+                }
+                wasNotified = false;
+            }
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
+
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (!wasNotified) {
+////                    Log.w(TAG, "no notifications");
+//                    turnOnService();
+//                    unableNotifications();
+//                }
+////                else
+////                    Log.w(TAG, "notifications");
+//                wasNotified = false;
+//                handler.postDelayed(this, 1000);
+//            }
+//        }, 1000);
+    }
+
+    public void receiveNotification() {
+        this.wasNotified = true;
+    }
+
+    /**
+     * Disable sensor.
+     */
+    public void disable() {
+        this.handler.removeCallbacksAndMessages(null);
+    }
 
     /**
      * Turns on this sensor's service.
@@ -115,8 +158,6 @@ public abstract class BleGenericSensor {
         }
         this.wasInitialized = true;
     }
-
-    boolean shouldEnableNotification = true;
 
     /**
      * Unable this sensor's notifications.
@@ -164,31 +205,6 @@ public abstract class BleGenericSensor {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Gyroscope, Magnetometer, Barometer, IR temperature all store 16 bit two's complement values as LSB MSB, which cannot be directly parsed
-     * as getIntValue(FORMAT_SINT16, offset) because the bytes are stored as little-endian.
-     * <p/>
-     * This function extracts these 16 bit two's complement values.
-     */
-    protected static Integer shortSignedAtOffset(byte[] c, int offset) {
-        Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer upperByte = (int) c[offset + 1]; // // Interpret MSB as signed
-        return (upperByte << 8) + lowerByte;
-    }
-
-    protected static Integer shortUnsignedAtOffset(byte[] c, int offset) {
-        Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer upperByte = (int) c[offset + 1] & 0xFF; // // Interpret MSB as signed
-        return (upperByte << 8) + lowerByte;
-    }
-
-    protected static Integer twentyFourBitUnsignedAtOffset(byte[] c, int offset) {
-        Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer mediumByte = (int) c[offset + 1] & 0xFF;
-        Integer upperByte = (int) c[offset + 2] & 0xFF;
-        return (upperByte << 16) + (mediumByte << 8) + lowerByte;
     }
 
     /**
