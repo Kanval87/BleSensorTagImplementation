@@ -101,7 +101,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            tools:layout="@layout/sensor_graph_fragement_layout"/>
+            tools:layout="@layout/sensor_pie_fragement_layout"/>
 
         <fragment
             android:id="@+id/luxometer_fragment"
