@@ -268,40 +268,46 @@ public class DeviceControlActivity extends Activity {
         BleGenericSensor bleGenericSensor;
         for (int i = 0; i < gattServices.size(); i++) {
             BluetoothGattService bluetoothGattService = gattServices.get(i);
-            boolean result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_HUM_SERV.toString());
+            boolean result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_HUMIDITY_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
                 bleGenericSensor = new SensorTagHumidityProfile(bluetoothGattService.getUuid(), mBluetoothLeService);
+                humidityFragment.setBleGenericSensor(bleGenericSensor);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
-            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_IRT_SERV.toString());
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_IRT_TEMPRATURE_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
                 bleGenericSensor = new IRTSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                irtFragment.setBleGenericSensor(bleGenericSensor);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
-            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_BAR_SERV.toString());
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_BAROMETER_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
                 bleGenericSensor = new BarometerSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                beroMeterSensorFragment.setBleGenericSensor(bleGenericSensor);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
-            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_MOV_SERV.toString());
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_MOTION_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
                 bleGenericSensor = new MotionSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                motionFragment.setBleGenericSensor(bleGenericSensor);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
             result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_KEY_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
                 bleGenericSensor = new SimpleKeysSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                keyFragment.setBleGenericSensor(bleGenericSensor);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
-            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_OPT_SERV.toString());
+            result = bluetoothGattService.getUuid().toString().contentEquals(SensorTagGatt.UUID_LUXOMETER_SERV.toString());
             if (result) {
                 Log.d(TAG, "Service :" + bluetoothGattService.getUuid().toString());
                 bleGenericSensor = new LuxometerSensor(bluetoothGattService.getUuid(), mBluetoothLeService);
+                luxometerFragment.setBleGenericSensor(bleGenericSensor);
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
         }

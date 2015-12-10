@@ -2,7 +2,7 @@ package com.example.android.bluetoothlegatt.BLEServices;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.os.Handler;
+import android.util.Log;
 
 import com.example.android.bluetoothlegatt.BluetoothLeService;
 import com.example.android.bluetoothlegatt.SensorTagGatt;
@@ -29,9 +29,9 @@ public abstract class BleGenericSensor {
     // Bluetooth instances.
     private BluetoothLeService mBluetoothLeService;
     // Check for a received notification every second.
-    private Handler handler;
     private boolean wasNotified;
     private boolean shouldSetPeriod = true;
+    private boolean isEnable = true;
 
     /**
      * Basic constructor.
@@ -83,6 +83,14 @@ public abstract class BleGenericSensor {
         return (upperByte << 16) + (mediumByte << 8) + lowerByte;
     }
 
+    public boolean isEnable() {
+        return isEnable;
+    }
+
+    public void setIsEnable(boolean isEnable) {
+        this.isEnable = isEnable;
+    }
+
     public void checkForNotification() {
 
         Runnable runnable = new Runnable() {
@@ -92,6 +100,9 @@ public abstract class BleGenericSensor {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }
+                if (!isEnable) {
+                    return;
                 }
                 if (!wasNotified) {
                     turnOnService();
@@ -104,20 +115,6 @@ public abstract class BleGenericSensor {
         Thread thread = new Thread(runnable);
         thread.start();
 
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (!wasNotified) {
-////                    Log.w(TAG, "no notifications");
-//                    turnOnService();
-//                    unableNotifications();
-//                }
-////                else
-////                    Log.w(TAG, "notifications");
-//                wasNotified = false;
-//                handler.postDelayed(this, 1000);
-//            }
-//        }, 1000);
     }
 
     public void receiveNotification() {
@@ -128,7 +125,54 @@ public abstract class BleGenericSensor {
      * Disable sensor.
      */
     public void disable() {
-        this.handler.removeCallbacksAndMessages(null);
+        isEnable = false;
+        deConfigureService();
+        disableService();
+
+    }
+
+    public void configureService() {
+        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+        UUID configUuid = UUID.fromString(SensorTagGatt.dataCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+        int error = this.mBluetoothLeService.setCharacteristicNotification(configCharacteristic, true);
+        this.mBluetoothLeService.writeDescriptor(configCharacteristic);
+        if (error != 0) {
+            if (configCharacteristic != null)
+                printError("Sensor notification enable failed: ", configCharacteristic, error);
+        }
+    }
+
+    private void printError(String s, BluetoothGattCharacteristic configCharacteristic, int error) {
+        Log.d(TAG, s);
+    }
+
+    public void deConfigureService() {
+        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+        UUID configUuid = UUID.fromString(SensorTagGatt.dataCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+        int error = this.mBluetoothLeService.setCharacteristicNotification(configCharacteristic, false);
+        this.mBluetoothLeService.writeDescriptor(configCharacteristic);
+        if (error != 0) {
+            if (configCharacteristic != null)
+                printError("Sensor notification disable failed: ", configCharacteristic, error);
+        }
+    }
+
+    public void enableService() {
+        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+        UUID configUuid = UUID.fromString(SensorTagGatt.configCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+        configCharacteristic.setValue(new byte[]{(byte) 0x01});
+        mBluetoothLeService.writeCharacteristic(configCharacteristic);
+    }
+
+    public void disableService() {
+        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+        UUID configUuid = UUID.fromString(SensorTagGatt.configCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+        configCharacteristic.setValue(new byte[]{(byte) 0x00});
+        mBluetoothLeService.writeCharacteristic(configCharacteristic);
     }
 
     /**
@@ -215,5 +259,11 @@ public abstract class BleGenericSensor {
     @Override
     public String toString() {
         throw new UnsupportedOperationException("Error: shouldn't be called.");
+    }
+
+    public void enable() {
+        isEnable = true;
+        enableService();
+        configureService();
     }
 }
