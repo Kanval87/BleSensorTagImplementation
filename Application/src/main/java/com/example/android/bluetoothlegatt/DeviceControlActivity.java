@@ -1,6 +1,7 @@
 package com.example.android.bluetoothlegatt;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -83,6 +84,7 @@ public class DeviceControlActivity extends Activity {
     private KeyFragment keyFragment;
     private LuxometerFragment luxometerFragment;
     private AbstractSensor beroMeterSensorFragment, irtFragment;
+    private ProgressDialog mProgressBar;
 
     public void onEventBackgroundThread(BleEvents event) {
 
@@ -117,6 +119,12 @@ public class DeviceControlActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
+
+        mProgressBar = new ProgressDialog(DeviceControlActivity.this);
+        mProgressBar.setMessage("Discovering Services...");
+        mProgressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        mProgressBar.show();
 
         ButterKnife.bind(this);
 
@@ -297,6 +305,8 @@ public class DeviceControlActivity extends Activity {
                 stringBleGenericSensorHashMap.put(bluetoothGattService.getUuid().toString(), bleGenericSensor);
             }
         }
+
+        mProgressBar.dismiss();
     }
 
 

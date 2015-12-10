@@ -51,6 +51,8 @@ public class LuxometerFragment extends AbstractSensor {
 
         valueIrtLineChart.setIndicatorTextUnit("Luxometer");
         valueIrtLineChart.addSeries(lineSeries);
+        valueIrtLineChart.setUseCubic(true);
+        valueIrtLineChart.setUseOverlapFill(true);
         valueIrtLineChart.startAnimation();
     }
 
