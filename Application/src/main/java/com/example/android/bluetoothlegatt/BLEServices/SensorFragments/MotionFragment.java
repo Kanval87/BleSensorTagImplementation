@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.android.bluetoothlegatt.BLEServices.SensorFragments.AbstractSensor.AbstractSensor;
 import com.example.android.bluetoothlegatt.R;
@@ -25,6 +26,12 @@ public class MotionFragment extends AbstractSensor {
     @Bind(R.id.stackedbarchart)
     StackedBarChart stackedBarChart;
     Handler handler = new Handler(Looper.getMainLooper());
+
+    @Bind(R.id.button_activate)
+    Button button_activate;
+
+    @Bind(R.id.button_period)
+    Button button_period;
 
     @Nullable
     @Override
@@ -81,6 +88,19 @@ public class MotionFragment extends AbstractSensor {
         stackedBarModel.addBar(new BarModel(2f, Color.RED));
 
         stackedBarChart.addBar(stackedBarModel);
+
+        button_activate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bleGenericSensor.isEnable()) {
+                    button_activate.setText(getResources().getText(R.string.string_button_activate));
+                    bleGenericSensor.disable();
+                } else {
+                    button_activate.setText(getResources().getText(R.string.string_button_deactivate));
+                    bleGenericSensor.enable();
+                }
+            }
+        });
 
 
     }
