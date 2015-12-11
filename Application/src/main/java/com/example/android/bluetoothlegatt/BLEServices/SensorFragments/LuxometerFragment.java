@@ -74,6 +74,15 @@ public class LuxometerFragment extends AbstractSensor {
                 }
             }
         });
+
+        button_period.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bleGenericSensor.isEnable()) {
+                    showPeriodSelectorDialog();
+                }
+            }
+        });
     }
 
 

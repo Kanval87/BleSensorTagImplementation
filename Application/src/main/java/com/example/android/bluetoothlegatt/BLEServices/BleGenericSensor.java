@@ -55,7 +55,7 @@ public abstract class BleGenericSensor {
 //        this.handler = new Handler();
         this.wasNotified = false;
 
-        checkForNotification();
+//        checkForNotification();
     }
 
     /**
@@ -87,35 +87,35 @@ public abstract class BleGenericSensor {
         return isEnable;
     }
 
-    public void setIsEnable(boolean isEnable) {
-        this.isEnable = isEnable;
-    }
-
-    public void checkForNotification() {
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (!isEnable) {
-                    return;
-                }
-                if (!wasNotified) {
-                    turnOnService();
-                    unableNotifications();
-                }
-                wasNotified = false;
-            }
-        };
-
-        Thread thread = new Thread(runnable);
-        thread.start();
-
-    }
+//    public void setIsEnable(boolean isEnable) {
+//        this.isEnable = isEnable;
+//    }
+//
+//    public void checkForNotification() {
+//
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                if (!isEnable) {
+//                    return;
+//                }
+//                if (!wasNotified) {
+//                    turnOnService();
+//                    unableNotifications();
+//                }
+//                wasNotified = false;
+//            }
+//        };
+//
+//        Thread thread = new Thread(runnable);
+//        thread.start();
+//
+//    }
 
     public void receiveNotification() {
         this.wasNotified = true;
@@ -132,14 +132,18 @@ public abstract class BleGenericSensor {
     }
 
     public void configureService() {
-        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
-        UUID configUuid = UUID.fromString(SensorTagGatt.dataCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
-        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
-        int error = this.mBluetoothLeService.setCharacteristicNotification(configCharacteristic, true);
-        this.mBluetoothLeService.writeDescriptor(configCharacteristic);
-        if (error != 0) {
-            if (configCharacteristic != null)
-                printError("Sensor notification enable failed: ", configCharacteristic, error);
+        try {
+            BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+            UUID configUuid = UUID.fromString(SensorTagGatt.dataCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+            BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+            int error = this.mBluetoothLeService.setCharacteristicNotification(configCharacteristic, true);
+            this.mBluetoothLeService.writeDescriptor(configCharacteristic);
+            if (error != 0) {
+                if (configCharacteristic != null)
+                    printError("Sensor notification enable failed: ", configCharacteristic, error);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -148,31 +152,43 @@ public abstract class BleGenericSensor {
     }
 
     public void deConfigureService() {
-        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
-        UUID configUuid = UUID.fromString(SensorTagGatt.dataCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
-        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
-        int error = this.mBluetoothLeService.setCharacteristicNotification(configCharacteristic, false);
-        this.mBluetoothLeService.writeDescriptor(configCharacteristic);
-        if (error != 0) {
-            if (configCharacteristic != null)
-                printError("Sensor notification disable failed: ", configCharacteristic, error);
+        try {
+            BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+            UUID configUuid = UUID.fromString(SensorTagGatt.dataCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+            BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+            int error = this.mBluetoothLeService.setCharacteristicNotification(configCharacteristic, false);
+            this.mBluetoothLeService.writeDescriptor(configCharacteristic);
+            if (error != 0) {
+                if (configCharacteristic != null)
+                    printError("Sensor notification disable failed: ", configCharacteristic, error);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void enableService() {
-        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
-        UUID configUuid = UUID.fromString(SensorTagGatt.configCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
-        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
-        configCharacteristic.setValue(new byte[]{(byte) 0x01});
-        mBluetoothLeService.writeCharacteristic(configCharacteristic);
+        try {
+            BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+            UUID configUuid = UUID.fromString(SensorTagGatt.configCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+            BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+            configCharacteristic.setValue(new byte[]{(byte) 0x01});
+            mBluetoothLeService.writeCharacteristic(configCharacteristic);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void disableService() {
-        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
-        UUID configUuid = UUID.fromString(SensorTagGatt.configCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
-        BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
-        configCharacteristic.setValue(new byte[]{(byte) 0x00});
-        mBluetoothLeService.writeCharacteristic(configCharacteristic);
+        try {
+            BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+            UUID configUuid = UUID.fromString(SensorTagGatt.configCharacteristicsOfService(this.serviceUuid.toString(), "Default"));
+            BluetoothGattCharacteristic configCharacteristic = service.getCharacteristic(configUuid);
+            configCharacteristic.setValue(new byte[]{(byte) 0x00});
+            mBluetoothLeService.writeCharacteristic(configCharacteristic);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -265,5 +281,21 @@ public abstract class BleGenericSensor {
         isEnable = true;
         enableService();
         configureService();
+    }
+
+    public void setPeriod(int value) {
+        BluetoothGattService service = this.mBluetoothLeService.getService(this.serviceUuid);
+        if (service == null) return;
+        if (shouldSetPeriod) {
+            try {
+                UUID periUuid = UUID.fromString(SensorTagGatt.periodCharacteristicsOfService(this.serviceUuid.toString(), "default"));
+                BluetoothGattCharacteristic periodCharacteristic = service.getCharacteristic(periUuid);
+                periodCharacteristic.setValue(new byte[]{(byte) value});
+                this.mBluetoothLeService.writeCharacteristic(periodCharacteristic);
+            } catch (Exception e) {
+                shouldSetPeriod = false;
+                e.printStackTrace();
+            }
+        }
     }
 }

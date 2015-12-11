@@ -44,6 +44,7 @@ public class SensorTagGatt {
     public final static UUID UUID_MOTION_PERI = fromString("f000aa83-0451-4000-b000-000000000000"); // Period in tens of milliseconds
     public final static UUID UUID_KEY_SERV = fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
     public final static UUID UUID_KEY_DATA = fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+    public static int Default_Period_Value = 100;
     // Useful maps.
     private static HashMap<String, String> attributes = new HashMap<>();
     private static HashMap<String, String> serverToConfig = new HashMap<>();
@@ -156,12 +157,12 @@ public class SensorTagGatt {
      * Gives the optimal period for the input service.
      */
     public static byte optimalPeriod(String serviceUuid) {
-        if (serviceUuid.equals(UUID_IRT_TEMPRATURE_SERV)) return (byte) 100;
-        else if (serviceUuid.equals(UUID_HUMIDITY_SERV)) return (byte) 100;
-        else if (serviceUuid.equals(UUID_BAROMETER_SERV)) return (byte) 100;
-        else if (serviceUuid.equals(UUID_LUXOMETER_SERV)) return (byte) 100;
-        else if (serviceUuid.equals(UUID_MOTION_SERV)) return (byte) 100;
-        else return (byte) 100;
+        if (serviceUuid.equals(UUID_IRT_TEMPRATURE_SERV)) return (byte) Default_Period_Value;
+        else if (serviceUuid.equals(UUID_HUMIDITY_SERV)) return (byte) Default_Period_Value;
+        else if (serviceUuid.equals(UUID_BAROMETER_SERV)) return (byte) Default_Period_Value;
+        else if (serviceUuid.equals(UUID_LUXOMETER_SERV)) return (byte) Default_Period_Value;
+        else if (serviceUuid.equals(UUID_MOTION_SERV)) return (byte) Default_Period_Value;
+        else return (byte) Default_Period_Value;
     }
 
     /**

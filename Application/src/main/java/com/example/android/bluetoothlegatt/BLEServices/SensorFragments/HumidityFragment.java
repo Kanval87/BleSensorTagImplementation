@@ -43,11 +43,11 @@ public class HumidityFragment extends AbstractSensor {
         return inflater.inflate(R.layout.sensor_graph_fragement_layout, container, false);
     }
 
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-
 
         lineSeries.setColor(Color.GRAY);
         for (int i = 0; i < DeviceControlActivity.TotalSize; i++) {
@@ -69,6 +69,15 @@ public class HumidityFragment extends AbstractSensor {
                 } else {
                     button_activate.setText(getResources().getText(R.string.string_button_deactivate));
                     bleGenericSensor.enable();
+                }
+            }
+        });
+
+        button_period.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bleGenericSensor.isEnable()) {
+                    showPeriodSelectorDialog();
                 }
             }
         });

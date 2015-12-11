@@ -42,4 +42,7 @@
     <string name="string_button_deactivate">Deactivate</string>
     <string name="string_button_activate">Activate</string>
     <string name="string_button_period">Set Period</string>
+    <string name="period_dialog_text">Please select new period value</string>
+    <string name="dialog_text_oky">Oky</string>
+    <string name="dialog_text_cancel">Cancel</string>
 </resources>
