@@ -1,6 +1,6 @@
-package com.example.android.bluetoothlegatt.BLEServices.Implementation;
+package com.example.android.bluetoothlegatt.BLEServices.BleSensor.Implementation;
 
-import com.example.android.bluetoothlegatt.BLEServices.BleGenericSensor;
+import com.example.android.bluetoothlegatt.BLEServices.BleSensor.Implementation.bleSensorAbstract.BleGenericSensor;
 import com.example.android.bluetoothlegatt.BluetoothLeService;
 import com.example.android.bluetoothlegatt.utils.Point3D;
 

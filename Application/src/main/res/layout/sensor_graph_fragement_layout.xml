@@ -13,15 +13,13 @@
         <Button
             android:id="@+id/button_activate"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="50dp"
             android:text="@string/string_button_deactivate"/>
 
         <Button
             android:id="@+id/button_period"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="50dp"
             android:text="@string/string_button_period"/>
     </LinearLayout>
 

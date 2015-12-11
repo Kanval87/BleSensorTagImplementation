@@ -28,8 +28,6 @@ public class KeyFragment extends AbstractSensor {
     @Bind(R.id.button_activate)
     Button button_activate;
 
-    @Bind(R.id.button_period)
-    Button button_period;
 
     Handler handler = new Handler(Looper.getMainLooper());
 
@@ -64,14 +62,6 @@ public class KeyFragment extends AbstractSensor {
             }
         });
 
-        button_period.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (bleGenericSensor.isEnable()) {
-                    showPeriodSelectorDialog();
-                }
-            }
-        });
     }
 
 

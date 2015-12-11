@@ -6,7 +6,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.widget.NumberPicker;
 
-import com.example.android.bluetoothlegatt.BLEServices.BleGenericSensor;
+import com.example.android.bluetoothlegatt.BLEServices.BleSensor.Implementation.bleSensorAbstract.BleGenericSensor;
 import com.example.android.bluetoothlegatt.R;
 import com.example.android.bluetoothlegatt.SensorTagGatt;
 
@@ -27,12 +27,6 @@ public abstract class AbstractSensor extends Fragment implements SensorDataListe
         numberPicker.setMaxValue(2000);
         numberPicker.setMinValue(10);
         numberPicker.setValue(selectedPeriod);
-        numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                picker.setValue((newVal < oldVal) ? oldVal - 10 : oldVal + 10);
-            }
-        });
 
         builder.setView(numberPicker);
         builder.setPositiveButton(getResources().getString(R.string.dialog_text_oky), new Dialog.OnClickListener() {

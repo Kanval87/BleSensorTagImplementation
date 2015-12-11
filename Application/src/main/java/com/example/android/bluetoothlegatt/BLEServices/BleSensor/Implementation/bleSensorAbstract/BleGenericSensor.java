@@ -1,4 +1,4 @@
-package com.example.android.bluetoothlegatt.BLEServices;
+package com.example.android.bluetoothlegatt.BLEServices.BleSensor.Implementation.bleSensorAbstract;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
